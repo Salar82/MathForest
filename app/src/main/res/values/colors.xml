@@ -8,4 +8,12 @@
     <color name="cloud_test">#54BDCE</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="jungle_green_primary">#66BB6A</color>
+    <color name="jungle_green_dark">#388E3C</color>
+    <color name="jungle_accent_yellow">#FFCA28</color>
+    <color name="jungle_accent_yellow_dark">#FFA000</color>
+    <color name="sky_blue_light">#81D4FA</color>
+    <color name="tiger_orange">#FFB74D</color>
+    <color name="button_red">#EF5350</color>
+
 </resources>
