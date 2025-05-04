@@ -1,5 +1,3 @@
-import javax.naming.Binding
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
