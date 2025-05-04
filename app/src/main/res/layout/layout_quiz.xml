@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:progressBarStyleHorizontal"
+        android:layout_width="250dp"
+        android:layout_height="20dp"
+        android:layout_centerHorizontal="true"
+        android:max="100"
+        android:progress="100" />
+
+    <TextView
+        android:id="@+id/tv_question"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progress_bar"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/vazir"
+        android:gravity="center"
+        android:textSize="24sp"
+        tools:text="2 + 2 - 15 =" />
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_question"
+        android:layout_centerHorizontal="true"
+        android:columnCount="2">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="85dp"
+            android:layout_height="85dp"
+            app:cardBackgroundColor="#30A7BF"
+            android:layout_marginVertical="10dp"
+            android:layout_marginHorizontal="20dp"
+            app:cardCornerRadius="50dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/vazir"
+                android:gravity="center"
+                android:textSize="24sp"
+                tools:text="12" />
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="85dp"
+            android:layout_height="85dp"
+            app:cardBackgroundColor="#30A7BF"
+            android:layout_marginVertical="10dp"
+            android:layout_marginHorizontal="20dp"
+            app:cardCornerRadius="50dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/vazir"
+                android:gravity="center"
+                android:textSize="24sp"
+                tools:text="12" />
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="85dp"
+            android:layout_height="85dp"
+            app:cardBackgroundColor="#30A7BF"
+            android:layout_marginVertical="10dp"
+            android:layout_marginHorizontal="20dp"
+            app:cardCornerRadius="50dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/vazir"
+                android:gravity="center"
+                android:textSize="24sp"
+                tools:text="12" />
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="85dp"
+            android:layout_height="85dp"
+            app:cardBackgroundColor="#30A7BF"
+            android:layout_marginVertical="10dp"
+            android:layout_marginHorizontal="20dp"
+            app:cardCornerRadius="50dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/vazir"
+                android:gravity="center"
+                android:textSize="24sp"
+                tools:text="12" />
+        </com.google.android.material.card.MaterialCardView><com.google.android.material.card.MaterialCardView
+        android:layout_width="85dp"
+        android:layout_height="85dp"
+            app:cardBackgroundColor="#30A7BF"
+        android:layout_marginVertical="10dp"
+        android:layout_marginHorizontal="20dp"
+        app:cardCornerRadius="50dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/vazir"
+            android:gravity="center"
+            android:textSize="24sp"
+            tools:text="12" />
+    </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="85dp"
+            android:layout_height="85dp"
+            app:cardBackgroundColor="#30A7BF"
+            android:layout_marginVertical="10dp"
+            android:layout_marginHorizontal="20dp"
+            app:cardCornerRadius="50dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/vazir"
+                android:gravity="center"
+                android:textSize="24sp"
+                tools:text="12" />
+        </com.google.android.material.card.MaterialCardView>
+
+
+
+    </GridLayout>
+</RelativeLayout>
