@@ -8,11 +8,20 @@
     android:background="@drawable/bg_main"
     tools:context=".activities.MainActivity">
 
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="38dp"
+        android:src="@drawable/settings"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottie_sun"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="65dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:lottie_autoPlay="true"
@@ -23,7 +32,7 @@
         android:id="@+id/left_cloud"
         android:layout_width="180dp"
         android:layout_height="180dp"
-        android:layout_marginTop="-20dp"
+        android:layout_marginTop="110dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:lottie_autoPlay="true"
@@ -35,9 +44,10 @@
         android:id="@+id/rigth_cloud"
         android:layout_width="130dp"
         android:layout_height="130dp"
-        android:layout_marginStart="120dp"
-        app:layout_constraintBottom_toBottomOf="@+id/lottie_sun"
+        android:layout_marginStart="110dp"
+        android:layout_marginTop="110dp"
         app:layout_constraintStart_toStartOf="@+id/left_cloud"
+        app:layout_constraintTop_toTopOf="@+id/left_cloud"
         app:lottie_autoPlay="true"
         app:lottie_colorFilter="@color/cloud_test"
         app:lottie_loop="true"
@@ -55,9 +65,9 @@
     <ImageView
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="10dp"
         android:scaleType="fitXY"
         android:src="@drawable/flowers"
-        android:layout_marginTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,7 +90,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.27737227" />
+        app:layout_constraintGuide_percent="0.275" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
@@ -88,6 +98,17 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.61" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:layout_constraintBottom_toTopOf="@+id/lottieAnimationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rigth_cloud"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/lottie_play" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
