@@ -63,7 +63,7 @@
             android:drawablePadding="5dp"
             android:drawableTint="@color/button_red"
             android:fontFamily="@font/vazir"
-            android:hint="مدت زمان (دقیقه)"
+            android:hint="مدت زمان (ثانیه)"
             android:inputType="numberDecimal"
             android:textDirection="rtl"
             android:textSize="14sp" />

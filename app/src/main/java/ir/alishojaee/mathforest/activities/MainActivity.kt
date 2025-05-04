@@ -8,18 +8,22 @@ import android.app.Dialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import ir.alishojaee.mathforest.R
 import ir.alishojaee.mathforest.data.Settings
 import ir.alishojaee.mathforest.databinding.ActivityMainBinding
 import ir.alishojaee.mathforest.databinding.DialogSettingsBinding
+import ir.alishojaee.mathforest.databinding.LayoutQuizBinding
 import ir.alishojaee.mathforest.enums.GameDifficulty
+import ir.alishojaee.mathforest.utils.Quiz
 
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     lateinit var dialogBinding: DialogSettingsBinding
+    lateinit var quizBinding: LayoutQuizBinding
     lateinit var settingsSharedPreferences: SharedPreferences
     lateinit var settings: Settings
 
@@ -38,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         settingsSharedPreferences.run {
             settings = Settings(
                 getInt("count", 10),
-                getInt("time", 1),
+                getInt("time", 60),
                 when (getString("difficulty", "EASY")) {
                     "EASY" -> GameDifficulty.EASY
                     "REGULAR" -> GameDifficulty.REGULAR
@@ -123,6 +127,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onAnimationStart(p0: Animator) {}
 
             })
+            startGame()
         }
 
         binding.btnSettings.setOnClickListener {
@@ -211,5 +216,50 @@ class MainActivity : AppCompatActivity() {
 
             dialog.show()
         }
+    }
+
+    private fun startGame() {
+        var qCount = settings.count
+        fun newQuestion() {
+            val question = Quiz.generateQuestion(settings.difficulty)
+            val options = Quiz.generateOptions(settings.difficulty, question.answer)
+
+            quizBinding.tvQuestion.text = question.question
+            quizBinding.tvQuestion.tag = question.answer.toString()
+
+            quizBinding.tvOpt1.text = options[0].toString()
+            quizBinding.tvOpt2.text = options[1].toString()
+            quizBinding.tvOpt3.text = options[2].toString()
+            quizBinding.tvOpt4.text = options[3].toString()
+            quizBinding.tvOpt5.text = options[4].toString()
+            quizBinding.tvOpt6.text = options[5].toString()
+        }
+
+        fun checkAnswer(selectedAnswer: String) {
+            qCount--
+            if (quizBinding.tvQuestion.tag == selectedAnswer)
+                won()
+            else
+                lose()
+
+            newQuestion()
+        }
+
+        quizBinding = LayoutQuizBinding.bind(binding.included.root)
+        quizBinding.btnOpt1.setOnClickListener { checkAnswer(quizBinding.tvOpt1.text.toString()) }
+        quizBinding.btnOpt2.setOnClickListener { checkAnswer(quizBinding.tvOpt2.text.toString()) }
+        quizBinding.btnOpt3.setOnClickListener { checkAnswer(quizBinding.tvOpt3.text.toString()) }
+        quizBinding.btnOpt4.setOnClickListener { checkAnswer(quizBinding.tvOpt4.text.toString()) }
+        quizBinding.btnOpt5.setOnClickListener { checkAnswer(quizBinding.tvOpt5.text.toString()) }
+        quizBinding.btnOpt6.setOnClickListener { checkAnswer(quizBinding.tvOpt6.text.toString()) }
+        newQuestion()
+    }
+
+    private fun won() {
+        Toast.makeText(this, "Winner!", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun lose() {
+
     }
 }
