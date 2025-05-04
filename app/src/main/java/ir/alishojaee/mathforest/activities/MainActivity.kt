@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import ir.alishojaee.mathforest.R
 import ir.alishojaee.mathforest.data.Settings
 import ir.alishojaee.mathforest.databinding.ActivityMainBinding
@@ -72,61 +73,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initClickListeners() {
-        val topOffset = -210f
-        val bottomOffset = 300f
-        val leftCloudAnimation = ObjectAnimator.ofFloat(
-            binding.leftCloud, "translationY", 0f, topOffset - 40f
-        )
-        val rightCloudAnimation = ObjectAnimator.ofFloat(
-            binding.rightCloud, "translationY", 0f, topOffset - 40f
-        )
-        val sunAnimation = ObjectAnimator.ofFloat(
-            binding.lottieSun, "translationY", 0f, topOffset
-        )
-        val quizLayoutAnimation = ObjectAnimator.ofFloat(
-            binding.layoutQuiz, "translationY", 0f, topOffset - 40f
-        )
-        val tigerAnimation = ObjectAnimator.ofFloat(
-            binding.lottieTiger, "translationY", 0f, bottomOffset + 20f
-        )
-        val tigerGoLeftAnimation = ObjectAnimator.ofFloat(
-            binding.lottieTiger, "translationX", 0f, -60f
-        )
-        val grassAnimation = ObjectAnimator.ofFloat(
-            binding.imgGrass, "translationY", 0f, bottomOffset
-        )
-        val flowersAnimation = ObjectAnimator.ofFloat(
-            binding.imgFlowers, "translationY", 0f, bottomOffset
-        )
 
-        val animatorSet = AnimatorSet().apply {
-            playTogether(
-                leftCloudAnimation,
-                rightCloudAnimation,
-                quizLayoutAnimation,
-                sunAnimation,
-                tigerAnimation,
-                tigerGoLeftAnimation,
-                grassAnimation,
-                flowersAnimation
-            )
-            duration = 3000
-        }
 
         binding.btnPlay.setOnClickListener {
-            binding.btnPlay.visibility = View.INVISIBLE
-            binding.btnSettings.visibility = View.INVISIBLE
-            animatorSet.start()
-            animatorSet.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationCancel(p0: Animator) {}
-                override fun onAnimationEnd(p0: Animator) {
-                    binding.layoutQuiz.visibility = View.VISIBLE
-                }
-
-                override fun onAnimationRepeat(p0: Animator) {}
-                override fun onAnimationStart(p0: Animator) {}
-
-            })
+            binding.btnPlay.apply {
+                animate()
+                    .alpha(0f)
+                    .setDuration(600)
+                    .setListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {}
+                        override fun onAnimationEnd(animation: Animator) {
+                            isVisible = false
+                        }
+                        override fun onAnimationCancel(animation: Animator) {}
+                        override fun onAnimationRepeat(animation: Animator) {}
+                    })
+            }
+            binding.btnSettings.apply {
+                animate()
+                    .alpha(0f)
+                    .setDuration(600)
+                    .setListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {}
+                        override fun onAnimationEnd(animation: Animator) {
+                            isVisible = false
+                        }
+                        override fun onAnimationCancel(animation: Animator) {}
+                        override fun onAnimationRepeat(animation: Animator) {}
+                    })
+            }
+            toggleQuizLayout()
             startGame()
         }
 
@@ -218,6 +194,92 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun toggleQuizLayout(isNotShowQuiz: Boolean = true) {
+        Toast.makeText(this, isNotShowQuiz.toString(), Toast.LENGTH_SHORT).show()
+
+        val cloudsQuizOffset = -250f
+        val sunOffset = -210f
+        val grassFlowersOffset = 300f
+        val tigerVerticalFlowersOffset = 320f
+        val tigerHorizontalFlowersOffset = -60f
+
+        val (fromCloud, toCloud) = if (isNotShowQuiz) 0f to cloudsQuizOffset else cloudsQuizOffset to 0f
+        val (fromSun, toSun) = if (isNotShowQuiz) 0f to sunOffset else sunOffset to 0f
+        val (fromQuiz, toQuiz) = if (isNotShowQuiz) 0f to cloudsQuizOffset else cloudsQuizOffset to 0f
+        val (fromTigerY, toTigerY) = if (isNotShowQuiz) 0f to tigerVerticalFlowersOffset else tigerVerticalFlowersOffset to 0f
+        val (fromTigerX, toTigerX) = if (isNotShowQuiz) 0f to tigerHorizontalFlowersOffset else tigerHorizontalFlowersOffset to 0f
+        val (fromGrass, toGrass) = if (isNotShowQuiz) 0f to grassFlowersOffset else grassFlowersOffset to 0f
+        val (fromFlowers, toFlowers) = if (isNotShowQuiz) 0f to grassFlowersOffset else grassFlowersOffset to 0f
+
+        val leftCloudAnimation =
+            ObjectAnimator.ofFloat(binding.leftCloud, "translationY", fromCloud, toCloud)
+        val rightCloudAnimation =
+            ObjectAnimator.ofFloat(binding.rightCloud, "translationY", fromCloud, toCloud)
+        val sunAnimation = ObjectAnimator.ofFloat(binding.lottieSun, "translationY", fromSun, toSun)
+        val quizLayoutAnimation =
+            ObjectAnimator.ofFloat(binding.layoutQuiz, "translationY", fromQuiz, toQuiz)
+        val tigerAnimation =
+            ObjectAnimator.ofFloat(binding.lottieTiger, "translationY", fromTigerY, toTigerY)
+        val tigerGoLeftAnimation =
+            ObjectAnimator.ofFloat(binding.lottieTiger, "translationX", fromTigerX, toTigerX)
+        val grassAnimation =
+            ObjectAnimator.ofFloat(binding.imgGrass, "translationY", fromGrass, toGrass)
+        val flowersAnimation =
+            ObjectAnimator.ofFloat(binding.imgFlowers, "translationY", fromFlowers, toFlowers)
+
+        val animatorSet = AnimatorSet().apply {
+            playTogether(
+                leftCloudAnimation,
+                rightCloudAnimation,
+                quizLayoutAnimation,
+                sunAnimation,
+                tigerAnimation,
+                tigerGoLeftAnimation,
+                grassAnimation,
+                flowersAnimation
+            )
+            duration = 1000
+        }
+
+        animatorSet.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) {
+                if (isNotShowQuiz) {
+                    binding.layoutQuiz.apply {
+                        alpha = 0f
+                        visibility = View.VISIBLE
+                        animate()
+                            .alpha(1f)
+                            .setDuration(600)
+                            .setListener(null)
+                    }
+                } else {
+                    binding.btnPlay.apply {
+                        alpha = 0f
+                        isVisible = true
+                        animate()
+                            .alpha(1f)
+                            .setDuration(600)
+                            .setListener(null)
+                    }
+                    binding.btnSettings.apply {
+                        alpha = 0f
+                        isVisible = true
+                        animate()
+                            .alpha(1f)
+                            .setDuration(600)
+                            .setListener(null)
+                    }
+                }
+            }
+
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+        })
+
+        animatorSet.start()
+    }
+
     private fun startGame() {
         var qCount = settings.count
         fun newQuestion() {
@@ -252,6 +314,22 @@ class MainActivity : AppCompatActivity() {
         quizBinding.btnOpt4.setOnClickListener { checkAnswer(quizBinding.tvOpt4.text.toString()) }
         quizBinding.btnOpt5.setOnClickListener { checkAnswer(quizBinding.tvOpt5.text.toString()) }
         quizBinding.btnOpt6.setOnClickListener { checkAnswer(quizBinding.tvOpt6.text.toString()) }
+        quizBinding.btnCancel.setOnClickListener {
+            binding.layoutQuiz.animate()
+                .alpha(0f)
+                .setDuration(600)
+                .setListener(object : Animator.AnimatorListener {
+                    override fun onAnimationCancel(p0: Animator) {}
+                    override fun onAnimationEnd(p0: Animator) {
+                        binding.layoutQuiz.isVisible = false
+                        toggleQuizLayout(false)
+                    }
+
+                    override fun onAnimationRepeat(p0: Animator) {}
+                    override fun onAnimationStart(p0: Animator) {}
+
+                })
+        }
         newQuestion()
     }
 
