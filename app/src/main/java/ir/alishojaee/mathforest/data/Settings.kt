@@ -1,6 +1,6 @@
 package ir.alishojaee.mathforest.data
 
-import ir.alishojaee.mathforest.enums.GameDifficulty
+import ir.alishojaee.mathforest.enum.GameDifficulty
 
 data class Settings(
     var count: Int,

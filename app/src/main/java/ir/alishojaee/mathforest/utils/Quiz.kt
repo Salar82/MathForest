@@ -1,7 +1,7 @@
 package ir.alishojaee.mathforest.utils
 
 import ir.alishojaee.mathforest.data.MathQuestion
-import ir.alishojaee.mathforest.enums.GameDifficulty
+import ir.alishojaee.mathforest.enum.GameDifficulty
 import kotlin.random.Random
 
 class Quiz {

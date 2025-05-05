@@ -1,4 +1,4 @@
-package ir.alishojaee.mathforest.enums
+package ir.alishojaee.mathforest.enum
 
 enum class GameDifficulty {
     EASY,

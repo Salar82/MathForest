@@ -1,4 +1,4 @@
-package ir.alishojaee.mathforest.activities
+package ir.alishojaee.mathforest.activity
 
 import android.animation.Animator
 import android.animation.AnimatorSet
@@ -6,27 +6,39 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Dialog
 import android.content.SharedPreferences
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.GridLayoutManager
+import com.airbnb.lottie.LottieAnimationView
+import com.google.android.material.card.MaterialCardView
 import ir.alishojaee.mathforest.R
+import ir.alishojaee.mathforest.adapter.QuizOptionsRecyclerAdapter
+import ir.alishojaee.mathforest.adapter.WinnerLoserListener
+import ir.alishojaee.mathforest.data.MathQuestion
 import ir.alishojaee.mathforest.data.Settings
 import ir.alishojaee.mathforest.databinding.ActivityMainBinding
 import ir.alishojaee.mathforest.databinding.DialogSettingsBinding
 import ir.alishojaee.mathforest.databinding.LayoutQuizBinding
-import ir.alishojaee.mathforest.enums.GameDifficulty
+import ir.alishojaee.mathforest.enum.GameDifficulty
 import ir.alishojaee.mathforest.utils.Quiz
+import ir.alishojaee.mathforest.utils.showToast
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
-    lateinit var dialogBinding: DialogSettingsBinding
-    lateinit var quizBinding: LayoutQuizBinding
-    lateinit var settingsSharedPreferences: SharedPreferences
-    lateinit var settings: Settings
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var dialogBinding: DialogSettingsBinding
+    private lateinit var quizBinding: LayoutQuizBinding
+    private lateinit var quizAdapter: QuizOptionsRecyclerAdapter
+    private lateinit var settingsSharedPreferences: SharedPreferences
+    private lateinit var settings: Settings
+    private lateinit var mainMusic: MediaPlayer
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +48,24 @@ class MainActivity : AppCompatActivity() {
         initData()
         initViews()
         initClickListeners()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (settings.isMusic)
+            mainMusic.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (settings.isMusic)
+            mainMusic.start()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (settings.isMusic)
+            mainMusic.release()
     }
 
     private fun initData() {
@@ -70,11 +100,14 @@ class MainActivity : AppCompatActivity() {
             repeatMode = ValueAnimator.REVERSE
             start()
         }
+        mainMusic = MediaPlayer.create(this, R.raw.sunny).apply {
+            isLooping = true
+        }
+        if (settings.isMusic)
+            mainMusic.start()
     }
 
     private fun initClickListeners() {
-
-
         binding.btnPlay.setOnClickListener {
             binding.btnPlay.apply {
                 animate()
@@ -85,6 +118,7 @@ class MainActivity : AppCompatActivity() {
                         override fun onAnimationEnd(animation: Animator) {
                             isVisible = false
                         }
+
                         override fun onAnimationCancel(animation: Animator) {}
                         override fun onAnimationRepeat(animation: Animator) {}
                     })
@@ -98,6 +132,7 @@ class MainActivity : AppCompatActivity() {
                         override fun onAnimationEnd(animation: Animator) {
                             isVisible = false
                         }
+
                         override fun onAnimationCancel(animation: Animator) {}
                         override fun onAnimationRepeat(animation: Animator) {}
                     })
@@ -168,6 +203,11 @@ class MainActivity : AppCompatActivity() {
                 settings.isSound = isSound
                 settings.isMusic = isMusic
 
+                if (!isMusic)
+                    mainMusic.pause()
+                else
+                    mainMusic.start()
+
                 settingsSharedPreferences.edit().run {
                     putInt("count", settings.count)
                     putInt("time", settings.time)
@@ -195,8 +235,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun toggleQuizLayout(isNotShowQuiz: Boolean = true) {
-        Toast.makeText(this, isNotShowQuiz.toString(), Toast.LENGTH_SHORT).show()
-
         val cloudsQuizOffset = -250f
         val sunOffset = -210f
         val grassFlowersOffset = 300f
@@ -281,63 +319,109 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startGame() {
-        var qCount = settings.count
-        fun newQuestion() {
-            val question = Quiz.generateQuestion(settings.difficulty)
-            val options = Quiz.generateOptions(settings.difficulty, question.answer)
+        var qCount = settings.count  // Wrong Answers
+        var cCount = 0  // Correct Answers
+
+        fun nextQuestion(adapter: QuizOptionsRecyclerAdapter) {
+            if (qCount == 0)
+                finishGame(settings.count - cCount, cCount)
+            val question: MathQuestion = Quiz.generateQuestion(settings.difficulty)
+            val options: List<Int> = Quiz.generateOptions(settings.difficulty, question.answer)
 
             quizBinding.tvQuestion.text = question.question
-            quizBinding.tvQuestion.tag = question.answer.toString()
-
-            quizBinding.tvOpt1.text = options[0].toString()
-            quizBinding.tvOpt2.text = options[1].toString()
-            quizBinding.tvOpt3.text = options[2].toString()
-            quizBinding.tvOpt4.text = options[3].toString()
-            quizBinding.tvOpt5.text = options[4].toString()
-            quizBinding.tvOpt6.text = options[5].toString()
-        }
-
-        fun checkAnswer(selectedAnswer: String) {
+            adapter.answer = question.answer
+            adapter.updateData(options)
             qCount--
-            if (quizBinding.tvQuestion.tag == selectedAnswer)
-                won()
-            else
-                lose()
-
-            newQuestion()
         }
 
         quizBinding = LayoutQuizBinding.bind(binding.included.root)
-        quizBinding.btnOpt1.setOnClickListener { checkAnswer(quizBinding.tvOpt1.text.toString()) }
-        quizBinding.btnOpt2.setOnClickListener { checkAnswer(quizBinding.tvOpt2.text.toString()) }
-        quizBinding.btnOpt3.setOnClickListener { checkAnswer(quizBinding.tvOpt3.text.toString()) }
-        quizBinding.btnOpt4.setOnClickListener { checkAnswer(quizBinding.tvOpt4.text.toString()) }
-        quizBinding.btnOpt5.setOnClickListener { checkAnswer(quizBinding.tvOpt5.text.toString()) }
-        quizBinding.btnOpt6.setOnClickListener { checkAnswer(quizBinding.tvOpt6.text.toString()) }
-        quizBinding.btnCancel.setOnClickListener {
-            binding.layoutQuiz.animate()
-                .alpha(0f)
-                .setDuration(600)
-                .setListener(object : Animator.AnimatorListener {
-                    override fun onAnimationCancel(p0: Animator) {}
-                    override fun onAnimationEnd(p0: Animator) {
-                        binding.layoutQuiz.isVisible = false
-                        toggleQuizLayout(false)
-                    }
+        quizAdapter = QuizOptionsRecyclerAdapter(
+            listOf(), winnerLoserListener = object : WinnerLoserListener {
+                override fun onWin(
+                    cardOption: MaterialCardView,
+                    tvOption: TextView,
+                    lottieParticle: LottieAnimationView
+                ) {
+                    cCount++
+                    tvOption.setTextColor(
+                        ContextCompat.getColor(
+                            this@MainActivity,
+                            R.color.white
+                        )
+                    )
+                    cardOption.setCardBackgroundColor(
+                        ContextCompat.getColor(this@MainActivity, R.color.jungle_green_primary)
+                    )
+                    lottieParticle.isVisible = true
+                    lottieParticle.addAnimatorListener(
+                        object : Animator.AnimatorListener {
+                            override fun onAnimationCancel(p0: Animator) {}
+                            override fun onAnimationEnd(p0: Animator) {
+                                tvOption.setTextColor(
+                                    ContextCompat.getColor(
+                                        this@MainActivity,
+                                        R.color.cloud_test
+                                    )
+                                )
+                                cardOption.setCardBackgroundColor(
+                                    ContextCompat.getColor(this@MainActivity, R.color.white)
+                                )
+                                nextQuestion(quizAdapter)
+                            }
 
-                    override fun onAnimationRepeat(p0: Animator) {}
-                    override fun onAnimationStart(p0: Animator) {}
+                            override fun onAnimationRepeat(p0: Animator) {}
+                            override fun onAnimationStart(p0: Animator) {}
+                        }
+                    )
+                    lottieParticle.playAnimation()
+                }
 
-                })
-        }
-        newQuestion()
+                override fun onLose(cardOption: MaterialCardView, tvOption: TextView) {
+                    qCount--
+                    nextQuestion(quizAdapter)
+                    tvOption.setTextColor(
+                        ContextCompat.getColor(
+                            this@MainActivity,
+                            R.color.cloud_test
+                        )
+                    )
+                    cardOption.setCardBackgroundColor(
+                        ContextCompat.getColor(this@MainActivity, R.color.white)
+                    )
+                }
+            }
+        )
+
+
+        quizBinding.recyclerOptions.layoutManager = GridLayoutManager(
+            this,
+            2,
+            GridLayoutManager.VERTICAL, false
+        )
+        quizBinding.recyclerOptions.adapter = quizAdapter
+        nextQuestion(quizAdapter)
     }
 
-    private fun won() {
-        Toast.makeText(this, "Winner!", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun lose() {
-
+    private fun finishGame(wCount: Int, cCount: Int) {
+        showToast("You won! $wCount, $cCount")
     }
 }
+
+
+//var qCount = settings.count
+//quizBinding.btnCancel.setOnClickListener {
+//    binding.layoutQuiz.animate()
+//        .alpha(0f)
+//        .setDuration(600)
+//        .setListener(object : Animator.AnimatorListener {
+//            override fun onAnimationCancel(p0: Animator) {}
+//            override fun onAnimationEnd(p0: Animator) {
+//                binding.layoutQuiz.isVisible = false
+//                toggleQuizLayout(false)
+//            }
+//
+//            override fun onAnimationRepeat(p0: Animator) {}
+//            override fun onAnimationStart(p0: Animator) {}
+//
+//        })
+//}
