@@ -27,6 +27,7 @@ import ir.alishojaee.mathforest.databinding.DialogSettingsBinding
 import ir.alishojaee.mathforest.databinding.LayoutQuizBinding
 import ir.alishojaee.mathforest.enum.GameDifficulty
 import ir.alishojaee.mathforest.utils.Quiz
+import ir.alishojaee.mathforest.utils.randomChoice
 import ir.alishojaee.mathforest.utils.showToast
 
 
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingsSharedPreferences: SharedPreferences
     private lateinit var settings: Settings
     private lateinit var mainMusic: MediaPlayer
+    private lateinit var playMusic: MediaPlayer
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,6 +86,10 @@ class MainActivity : AppCompatActivity() {
                 getBoolean("isSound", true),
             )
         }
+        mainMusic = MediaPlayer.create(this, R.raw.sunny).apply {
+            isLooping = true
+        }
+        playMusic = MediaPlayer.create(this, R.raw.se_play)
     }
 
     private fun initViews() {
@@ -100,9 +106,6 @@ class MainActivity : AppCompatActivity() {
             repeatMode = ValueAnimator.REVERSE
             start()
         }
-        mainMusic = MediaPlayer.create(this, R.raw.sunny).apply {
-            isLooping = true
-        }
         if (settings.isMusic)
             mainMusic.start()
     }
@@ -110,6 +113,10 @@ class MainActivity : AppCompatActivity() {
     private fun initClickListeners() {
         binding.btnPlay.setOnClickListener {
             binding.btnPlay.apply {
+                if (settings.isSound) {
+                    mainMusic.setVolume(0.4f, 0.4f)
+                    playMusic.start()
+                }
                 animate()
                     .alpha(0f)
                     .setDuration(600)
@@ -343,6 +350,12 @@ class MainActivity : AppCompatActivity() {
                     lottieParticle: LottieAnimationView
                 ) {
                     cCount++
+                    // Correct sound effect
+                    MediaPlayer.create(
+                        this@MainActivity,
+                        randomChoice(listOf(R.raw.afarin, R.raw.afarin1))
+                    ).start()
+
                     tvOption.setTextColor(
                         ContextCompat.getColor(
                             this@MainActivity,
@@ -378,21 +391,38 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onLose(cardOption: MaterialCardView, tvOption: TextView) {
                     qCount--
-                    nextQuestion(quizAdapter)
                     tvOption.setTextColor(
                         ContextCompat.getColor(
                             this@MainActivity,
-                            R.color.cloud_test
+                            R.color.white
                         )
                     )
                     cardOption.setCardBackgroundColor(
-                        ContextCompat.getColor(this@MainActivity, R.color.white)
+                        ContextCompat.getColor(this@MainActivity, R.color.button_red)
                     )
+
+                    // Wrong sound effect
+                    MediaPlayer.create(this@MainActivity, R.raw.se_wrong_answer).run {
+
+                        // Next question
+                        setOnCompletionListener {
+                            nextQuestion(quizAdapter)
+                            tvOption.setTextColor(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.cloud_test
+                                )
+                            )
+                            cardOption.setCardBackgroundColor(
+                                ContextCompat.getColor(this@MainActivity, R.color.white)
+                            )
+                        }
+                        start()
+                    }
                 }
             }
         )
-
-
+        
         quizBinding.recyclerOptions.layoutManager = GridLayoutManager(
             this,
             2,
@@ -403,25 +433,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun finishGame(wCount: Int, cCount: Int) {
+        mainMusic.setVolume(1f, 1f)
         showToast("You won! $wCount, $cCount")
     }
 }
-
-
-//var qCount = settings.count
-//quizBinding.btnCancel.setOnClickListener {
-//    binding.layoutQuiz.animate()
-//        .alpha(0f)
-//        .setDuration(600)
-//        .setListener(object : Animator.AnimatorListener {
-//            override fun onAnimationCancel(p0: Animator) {}
-//            override fun onAnimationEnd(p0: Animator) {
-//                binding.layoutQuiz.isVisible = false
-//                toggleQuizLayout(false)
-//            }
-//
-//            override fun onAnimationRepeat(p0: Animator) {}
-//            override fun onAnimationStart(p0: Animator) {}
-//
-//        })
-//}
