@@ -26,6 +26,7 @@ class QuizOptionsRecyclerAdapter(
     var answer: Int = -1,
     val winnerLoserListener: WinnerLoserListener
 ) : RecyclerView.Adapter<QuizOptionsRecyclerAdapter.OptionViewHolder>() {
+    private var isClickable = false // Prevent multiple clicks
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OptionViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(
@@ -36,6 +37,8 @@ class QuizOptionsRecyclerAdapter(
 
     override fun onBindViewHolder(holder: OptionViewHolder, position: Int) {
         holder.cardOption.setOnClickListener {
+            if (!isClickable) return@setOnClickListener
+            isClickable = false
             if (holder.tvOption.text.equals(answer.toString()))
                 winnerLoserListener.onWin(
                     holder.cardOption,
@@ -54,6 +57,7 @@ class QuizOptionsRecyclerAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateData(newItems: List<Int>) {
+        isClickable = true
         options = newItems
         this.notifyDataSetChanged()
     }

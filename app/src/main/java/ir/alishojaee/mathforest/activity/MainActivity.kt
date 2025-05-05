@@ -6,13 +6,18 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Dialog
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.View
+import android.view.Window
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import com.airbnb.lottie.LottieAnimationView
@@ -24,6 +29,7 @@ import ir.alishojaee.mathforest.data.MathQuestion
 import ir.alishojaee.mathforest.data.Settings
 import ir.alishojaee.mathforest.databinding.ActivityMainBinding
 import ir.alishojaee.mathforest.databinding.DialogSettingsBinding
+import ir.alishojaee.mathforest.databinding.DialogWinLoseBinding
 import ir.alishojaee.mathforest.databinding.LayoutQuizBinding
 import ir.alishojaee.mathforest.enum.GameDifficulty
 import ir.alishojaee.mathforest.utils.Quiz
@@ -40,6 +46,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settings: Settings
     private lateinit var mainMusic: MediaPlayer
     private lateinit var playMusic: MediaPlayer
+    private lateinit var winMusic: MediaPlayer
+    private var quizCounter: CountDownTimer? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         if (settings.isMusic)
             mainMusic.release()
+        quizCounter?.cancel()
     }
 
     private fun initData() {
@@ -90,6 +99,7 @@ class MainActivity : AppCompatActivity() {
             isLooping = true
         }
         playMusic = MediaPlayer.create(this, R.raw.se_play)
+        winMusic = MediaPlayer.create(this, R.raw.music_win)
     }
 
     private fun initViews() {
@@ -156,7 +166,6 @@ class MainActivity : AppCompatActivity() {
                 setContentView(dialogBinding.root)
             }
 
-
             dialogBinding.etCount.setText(settings.count.toString())
             dialogBinding.etTime.setText(settings.time.toString())
             dialogBinding.btnVolume.setImageResource(
@@ -199,6 +208,12 @@ class MainActivity : AppCompatActivity() {
 
             // Save settings
             dialogBinding.btnSave.setOnClickListener {
+                // Validates
+                if (dialogBinding.etCount.text.toString().toInt() !in 3..100)
+                    return@setOnClickListener showToast("تعداد سوال حداقل ۳ و حداکثر ۱۰۰ می‌تواند باشد")
+                if (dialogBinding.etTime.text.toString().toInt() !in 5..900)
+                    return@setOnClickListener showToast("مدت زمان حداقل ۵ و حداکثر ۹۰۰ می‌تواند باشد")
+
                 settings.count = dialogBinding.etCount.text.toString().toInt()
                 settings.time = dialogBinding.etTime.text.toString().toInt()
                 settings.difficulty = when (dialogBinding.chipGroup.checkedChipId) {
@@ -241,7 +256,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun toggleQuizLayout(isNotShowQuiz: Boolean = true) {
+    private fun toggleQuizLayout(isNotShowQuiz: Boolean = true) {  // Fixme: rename variable
+        if (!isNotShowQuiz) {
+            binding.layoutQuiz.run {
+                animate()
+                    .alpha(0f)
+                    .setDuration(600L)
+                    .setListener(object : Animator.AnimatorListener {
+                        override fun onAnimationCancel(p0: Animator) {}
+
+                        override fun onAnimationEnd(p0: Animator) {
+                            this@run.isVisible = false
+                        }
+
+                        override fun onAnimationRepeat(p0: Animator) {}
+                        override fun onAnimationStart(p0: Animator) {}
+
+                    }).start()
+            }
+        }
+
+
         val cloudsQuizOffset = -250f
         val sunOffset = -210f
         val grassFlowersOffset = 300f
@@ -326,19 +361,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startGame() {
-        var qCount = settings.count  // Wrong Answers
-        var cCount = 0  // Correct Answers
+        var qRemainedCount = settings.count  // Wrong Answers
+        var wAnswerCount = 0  // Wrong Answers
 
         fun nextQuestion(adapter: QuizOptionsRecyclerAdapter) {
-            if (qCount == 0)
-                finishGame(settings.count - cCount, cCount)
+            if (qRemainedCount-- == 0 || wAnswerCount == 3) {
+                finishGame(wAnswerCount)
+                wAnswerCount = 0
+                return
+            }
             val question: MathQuestion = Quiz.generateQuestion(settings.difficulty)
             val options: List<Int> = Quiz.generateOptions(settings.difficulty, question.answer)
 
             quizBinding.tvQuestion.text = question.question
             adapter.answer = question.answer
             adapter.updateData(options)
-            qCount--
         }
 
         quizBinding = LayoutQuizBinding.bind(binding.included.root)
@@ -349,12 +386,14 @@ class MainActivity : AppCompatActivity() {
                     tvOption: TextView,
                     lottieParticle: LottieAnimationView
                 ) {
-                    cCount++
                     // Correct sound effect
-                    MediaPlayer.create(
-                        this@MainActivity,
-                        randomChoice(listOf(R.raw.afarin, R.raw.afarin1))
-                    ).start()
+                    if (settings.isSound) {
+                        val wonSound = MediaPlayer.create(
+                            this@MainActivity,
+                            randomChoice(listOf(R.raw.afarin, R.raw.afarin1))
+                        )
+                        wonSound.start()
+                    }
 
                     tvOption.setTextColor(
                         ContextCompat.getColor(
@@ -390,7 +429,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onLose(cardOption: MaterialCardView, tvOption: TextView) {
-                    qCount--
+                    wAnswerCount++
+
                     tvOption.setTextColor(
                         ContextCompat.getColor(
                             this@MainActivity,
@@ -401,28 +441,42 @@ class MainActivity : AppCompatActivity() {
                         ContextCompat.getColor(this@MainActivity, R.color.button_red)
                     )
 
-                    // Wrong sound effect
-                    MediaPlayer.create(this@MainActivity, R.raw.se_wrong_answer).run {
-
+                    if (settings.isSound) {
+                        // Wrong sound effect
+                        val loseSound =
+                            MediaPlayer.create(this@MainActivity, R.raw.se_wrong_answer).apply {
+                                // Next question
+                                setOnCompletionListener {
+                                    nextQuestion(quizAdapter)
+                                    tvOption.setTextColor(
+                                        ContextCompat.getColor(
+                                            this@MainActivity,
+                                            R.color.cloud_test
+                                        )
+                                    )
+                                    cardOption.setCardBackgroundColor(
+                                        ContextCompat.getColor(this@MainActivity, R.color.white)
+                                    )
+                                }
+                            }
+                        loseSound.start()
+                    } else {
                         // Next question
-                        setOnCompletionListener {
-                            nextQuestion(quizAdapter)
-                            tvOption.setTextColor(
-                                ContextCompat.getColor(
-                                    this@MainActivity,
-                                    R.color.cloud_test
-                                )
+                        nextQuestion(quizAdapter)
+                        tvOption.setTextColor(
+                            ContextCompat.getColor(
+                                this@MainActivity,
+                                R.color.cloud_test
                             )
-                            cardOption.setCardBackgroundColor(
-                                ContextCompat.getColor(this@MainActivity, R.color.white)
-                            )
-                        }
-                        start()
+                        )
+                        cardOption.setCardBackgroundColor(
+                            ContextCompat.getColor(this@MainActivity, R.color.white)
+                        )
                     }
                 }
             }
         )
-        
+
         quizBinding.recyclerOptions.layoutManager = GridLayoutManager(
             this,
             2,
@@ -430,10 +484,90 @@ class MainActivity : AppCompatActivity() {
         )
         quizBinding.recyclerOptions.adapter = quizAdapter
         nextQuestion(quizAdapter)
+        startProgressBarTimer(settings.time)
     }
 
-    private fun finishGame(wCount: Int, cCount: Int) {
+    private fun startProgressBarTimer(durationSeconds: Int) {
+        val totalDurationMillis = durationSeconds * 1000L
+        updateProgressBarColor(100)
+
+        quizCounter = object : CountDownTimer(totalDurationMillis, 100) {
+            override fun onTick(millisUntilFinished: Long) {
+                val progressRatio = millisUntilFinished.toDouble() / totalDurationMillis.toDouble()
+                val currentProgress = (progressRatio * 1000).toInt()
+                quizBinding.progressBar.progress = currentProgress
+
+                val currentPercentage = (progressRatio * 100).toInt()
+                updateProgressBarColor(currentPercentage)
+            }
+
+            override fun onFinish() {
+                finishGame(3)  // Lose
+            }
+        }
+
+        quizCounter?.start()
+    }
+
+    private fun updateProgressBarColor(progressPercent: Int) {
+        val colorResId = when {
+            progressPercent > 75 -> R.color.light_green
+            progressPercent > 50 -> R.color.jungle_accent_yellow
+            progressPercent > 25 -> R.color.orange
+            else -> R.color.red
+        }
+        val color = ContextCompat.getColor(this, colorResId)
+        quizBinding.progressBar.progressTintList = ColorStateList.valueOf(color)
+
+        val backgroundColor = ContextCompat.getColor(this, R.color.progress_background)
+        quizBinding.progressBar.progressBackgroundTintList = ColorStateList.valueOf(backgroundColor)
+    }
+
+    private fun finishGame(wAnswerCount: Int) {
         mainMusic.setVolume(1f, 1f)
-        showToast("You won! $wCount, $cCount")
+        quizCounter?.cancel()
+        quizBinding.progressBar.progress = 1000
+        updateProgressBarColor(1000)
+        if (wAnswerCount < 3) {
+            showWinLoseDialog(true)
+        } else {
+            showWinLoseDialog(false)
+        }
+    }
+
+    fun showWinLoseDialog(isWin: Boolean) {
+        val loseMusic = MediaPlayer.create(this, R.raw.se_lose)
+
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(false)
+
+        val binding = DialogWinLoseBinding.inflate(layoutInflater)
+        dialog.setContentView(binding.root)
+        dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+
+        if (isWin) {
+            binding.textMessage.text = "آفرین! تو بردی!"
+        } else {
+            binding.textMessage.text = "باختی عزیزم! دوباره امتحان کن."
+        }
+
+        if (settings.isMusic) {
+            mainMusic.pause()
+            if (isWin)
+                winMusic.start()
+            else
+                loseMusic.start()
+
+        }
+        binding.buttonOk.setOnClickListener {
+            dialog.dismiss()
+            if (settings.isMusic) {
+                winMusic.stop()
+                mainMusic.start()
+            }
+        }
+        toggleQuizLayout(false)
+        dialog.show()
     }
 }

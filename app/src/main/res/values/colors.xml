@@ -15,5 +15,9 @@
     <color name="sky_blue_light">#81D4FA</color>
     <color name="tiger_orange">#FFB74D</color>
     <color name="button_red">#EF5350</color>
+    <color name="light_green">#3C9E41</color>
+    <color name="orange">#FFA726</color>
+    <color name="red">#EF5350</color>
+    <color name="progress_background">#5C78A8</color>
 
 </resources>

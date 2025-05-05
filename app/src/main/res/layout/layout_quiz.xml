@@ -9,9 +9,11 @@
         style="?android:progressBarStyleHorizontal"
         android:layout_width="250dp"
         android:layout_height="20dp"
+        android:progressTint="@color/light_green"
+        android:progressBackgroundTint="@color/progress_background"
         android:layout_centerHorizontal="true"
-        android:max="100"
-        android:progress="100" />
+        android:max="1000"
+        android:progress="750" />
 
     <TextView
         android:id="@+id/tv_question"
