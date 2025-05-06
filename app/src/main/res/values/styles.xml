@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Alish.Chip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="android:textAppearance">@style/Alish.TextAppearance.Chip</item>
+    </style>
+
+    <style name="Alish.TextAppearance.Chip" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="fontFamily">@font/vazir</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+</resources>

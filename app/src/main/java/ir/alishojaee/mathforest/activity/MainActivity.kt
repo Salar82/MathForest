@@ -31,10 +31,10 @@ import ir.alishojaee.mathforest.databinding.ActivityMainBinding
 import ir.alishojaee.mathforest.databinding.DialogSettingsBinding
 import ir.alishojaee.mathforest.databinding.DialogWinLoseBinding
 import ir.alishojaee.mathforest.databinding.LayoutQuizBinding
-import ir.alishojaee.mathforest.enum.GameDifficulty
+import ir.alishojaee.mathforest.enums.GameDifficulty
+import ir.alishojaee.mathforest.enums.Operation
 import ir.alishojaee.mathforest.utils.Quiz
 import ir.alishojaee.mathforest.utils.randomChoice
-import ir.alishojaee.mathforest.utils.showToast
 
 
 class MainActivity : AppCompatActivity() {
@@ -84,13 +84,11 @@ class MainActivity : AppCompatActivity() {
         settingsSharedPreferences.run {
             settings = Settings(
                 getInt("count", 10),
-                getInt("time", 60),
-                when (getString("difficulty", "EASY")) {
-                    "EASY" -> GameDifficulty.EASY
-                    "REGULAR" -> GameDifficulty.REGULAR
-                    "HARD" -> GameDifficulty.HARD
-                    else -> GameDifficulty.EASY
-                },
+                getInt("time", -1),
+                getString("operations", "+,-")!!.split(",").mapNotNull { op ->
+                    Operation.entries.find { it.value == op.trim() }
+                } as MutableList<Operation>,
+                GameDifficulty.valueOf(getString("difficulty", "EASY")!!),
                 getBoolean("isMusic", true),
                 getBoolean("isSound", true),
             )
@@ -166,8 +164,6 @@ class MainActivity : AppCompatActivity() {
                 setContentView(dialogBinding.root)
             }
 
-            dialogBinding.etCount.setText(settings.count.toString())
-            dialogBinding.etTime.setText(settings.time.toString())
             dialogBinding.btnVolume.setImageResource(
                 when (settings.isSound) {
                     true -> R.drawable.img_volume
@@ -199,31 +195,84 @@ class MainActivity : AppCompatActivity() {
                 )
                 isMusic = !isMusic
             }
-            when (settings.difficulty) {
-                GameDifficulty.EASY -> dialogBinding.chipEasy.isChecked = true
-                GameDifficulty.REGULAR -> dialogBinding.chipRegular.isChecked = true
-                GameDifficulty.HARD -> dialogBinding.chipHard.isChecked = true
+
+            settings.operations.forEach {
+                when (it) {
+                    Operation.SUM -> dialogBinding.chOpSum.isChecked = true
+                    Operation.INTERACT -> dialogBinding.chOpInteract.isChecked = true
+                    Operation.MULTIPLY -> dialogBinding.chOpMultiply.isChecked = true
+                    Operation.DIVISION -> dialogBinding.chOpDivision.isChecked = true
+                }
             }
 
+            when (settings.time) {
+                -1 -> dialogBinding.chTimeNone.isChecked = true
+                15 -> dialogBinding.chTime15s.isChecked = true
+                30 -> dialogBinding.chTime30s.isChecked = true
+                60 -> dialogBinding.chTime1m.isChecked = true
+                5 * 60 -> dialogBinding.chTime5m.isChecked = true
+                10 * 60 -> dialogBinding.chTime10m.isChecked = true
+            }
+
+            when (settings.count) {
+                5 -> dialogBinding.chCount5.isChecked = true
+                10 -> dialogBinding.chCount10.isChecked = true
+                20 -> dialogBinding.chCount20.isChecked = true
+                50 -> dialogBinding.chCount50.isChecked = true
+                100 -> dialogBinding.chCount100.isChecked = true
+            }
+
+            when (settings.difficulty) {
+                GameDifficulty.EASY -> dialogBinding.chDifficultyEasy.isChecked = true
+                GameDifficulty.MEDIUM -> dialogBinding.chDifficultyMedium.isChecked = true
+                GameDifficulty.HARD -> dialogBinding.chDifficultyHard.isChecked = true
+            }
 
             // Save settings
             dialogBinding.btnSave.setOnClickListener {
                 // Validates
-                if (dialogBinding.etCount.text.toString().toInt() !in 3..100)
-                    return@setOnClickListener showToast("تعداد سوال حداقل ۳ و حداکثر ۱۰۰ می‌تواند باشد")
-                if (dialogBinding.etTime.text.toString().toInt() !in 5..900)
-                    return@setOnClickListener showToast("مدت زمان حداقل ۵ و حداکثر ۹۰۰ می‌تواند باشد")
-
-                settings.count = dialogBinding.etCount.text.toString().toInt()
-                settings.time = dialogBinding.etTime.text.toString().toInt()
-                settings.difficulty = when (dialogBinding.chipGroup.checkedChipId) {
-                    R.id.chip_easy -> GameDifficulty.EASY
-                    R.id.chip_regular -> GameDifficulty.REGULAR
-                    R.id.chip_hard -> GameDifficulty.HARD
-                    else -> throw Error()
+                settings.count = when (dialogBinding.chipGroupCount.checkedChipId) {
+                    R.id.ch_count_5 -> 5
+                    R.id.ch_count_10 -> 10
+                    R.id.ch_count_20 -> 20
+                    R.id.ch_count_50 -> 50
+                    R.id.ch_count_100 -> 100
+                    else -> 10
+                }
+                settings.time = when (dialogBinding.chipGroupTime.checkedChipId) {
+                    R.id.ch_time_none -> -1
+                    R.id.ch_time_15s -> 15
+                    R.id.ch_time_30s -> 30
+                    R.id.ch_time_1m -> 1 * 60
+                    R.id.ch_time_5m -> 5 * 60
+                    R.id.ch_time_10m -> 10 * 60
+                    else -> -1
+                }
+                settings.difficulty = when(dialogBinding.chipGroupDifficulty.checkedChipId) {
+                    R.id.ch_difficulty_easy -> GameDifficulty.EASY
+                    R.id.ch_difficulty_medium -> GameDifficulty.MEDIUM
+                    R.id.ch_difficulty_hard -> GameDifficulty.HARD
+                    else -> GameDifficulty.EASY
                 }
                 settings.isSound = isSound
                 settings.isMusic = isMusic
+                val operations = mutableListOf<String>()
+
+                dialogBinding.chipGroupOperation.checkedChipIds.forEach {
+                    operations.add(
+                        when (it) {
+                            R.id.ch_op_sum -> Operation.SUM.value
+                            R.id.ch_op_interact -> Operation.INTERACT.value
+                            R.id.ch_op_multiply -> Operation.MULTIPLY.value
+                            R.id.ch_op_division -> Operation.DIVISION.value
+                            else -> Operation.SUM.value
+                        }
+                    )
+                }
+
+                settings.operations = operations.mapNotNull { op ->
+                    Operation.entries.find { it.value == op.trim() }
+                } as MutableList<Operation>
 
                 if (!isMusic)
                     mainMusic.pause()
@@ -233,15 +282,10 @@ class MainActivity : AppCompatActivity() {
                 settingsSharedPreferences.edit().run {
                     putInt("count", settings.count)
                     putInt("time", settings.time)
-                    putString(
-                        "difficulty", when (settings.difficulty) {
-                            GameDifficulty.EASY -> "EASY"
-                            GameDifficulty.REGULAR -> "REGULAR"
-                            GameDifficulty.HARD -> "HARD"
-                        }
-                    )
+                    putString("operations", operations.joinToString(","))
+                    putString("difficulty", settings.difficulty.name)
                     putBoolean("isMusic", settings.isMusic)
-                    putBoolean("isSound", settings.isMusic)
+                    putBoolean("isSound", settings.isSound)
                     apply()
                 }
                 dialog.dismiss()
@@ -370,8 +414,8 @@ class MainActivity : AppCompatActivity() {
                 wAnswerCount = 0
                 return
             }
-            val question: MathQuestion = Quiz.generateQuestion(settings.difficulty)
-            val options: List<Int> = Quiz.generateOptions(settings.difficulty, question.answer)
+            val question: MathQuestion = Quiz.generateValidMathQuestion(settings.operations, settings.difficulty)
+            val options: List<Int> = Quiz.generateOptions(settings.operations, question.answer, settings.difficulty)
 
             quizBinding.tvQuestion.text = question.question
             adapter.answer = question.answer
@@ -484,7 +528,13 @@ class MainActivity : AppCompatActivity() {
         )
         quizBinding.recyclerOptions.adapter = quizAdapter
         nextQuestion(quizAdapter)
-        startProgressBarTimer(settings.time)
+
+        if (settings.time == -1) {
+            quizBinding.progressBar.isVisible = false
+        } else {
+            quizBinding.progressBar.isVisible = true
+            startProgressBarTimer(settings.time)
+        }
     }
 
     private fun startProgressBarTimer(durationSeconds: Int) {
