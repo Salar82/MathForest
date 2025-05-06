@@ -5,6 +5,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
@@ -42,6 +43,7 @@ import ir.alishojaee.mathforest.enums.GameDifficulty
 import ir.alishojaee.mathforest.enums.Operation
 import ir.alishojaee.mathforest.utils.Quiz
 import ir.alishojaee.mathforest.utils.randomChoice
+import ir.alishojaee.mathforest.utils.showToast
 
 
 class MainActivity : AppCompatActivity() {
@@ -131,18 +133,22 @@ class MainActivity : AppCompatActivity() {
     private fun initListeners() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                val animalBinding = DialogExitBinding.inflate(layoutInflater)
-                val dialog = Dialog(this@MainActivity).apply {
-                    setContentView(animalBinding.root)
-                }
+                if (binding.layoutQuiz.isVisible) {
+                    showForceQuitQuizDialog()
+                } else {
+                    val animalBinding = DialogExitBinding.inflate(layoutInflater)
+                    val dialog = Dialog(this@MainActivity).apply {
+                        setContentView(animalBinding.root)
+                    }
 
-                animalBinding.btnExit.setOnClickListener {
-                    finish()
+                    animalBinding.btnExit.setOnClickListener {
+                        finish()
+                    }
+                    animalBinding.btnRateApp.setOnClickListener {
+                        dialog.dismiss()
+                    }
+                    dialog.show()
                 }
-                animalBinding.btnRateApp.setOnClickListener {
-                    dialog.dismiss()
-                }
-                dialog.show()
             }
         })
     }
@@ -423,7 +429,11 @@ class MainActivity : AppCompatActivity() {
         )
 
         quizBinding.btnBack.setOnClickListener {
-            toggleQuizLayout(false)
+            showForceQuitQuizDialog()
+        }
+
+        quizBinding.tvQNumber.setOnClickListener {
+            showToast("هنوز ${qRemainedCount} سوال دیگه مونده!")
         }
 
         quizBinding.recyclerOptions.layoutManager = GridLayoutManager(
@@ -697,5 +707,16 @@ class MainActivity : AppCompatActivity() {
         )
         dialog.show()
 
+    }
+
+    private fun showForceQuitQuizDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("پایان سوالات")
+            .setMessage("از حل سوالات منصرف شدی؟")
+            .setPositiveButton("بله") { dialog, which ->
+                toggleQuizLayout(false)
+            }
+            .setNegativeButton("خیر", null)
+            .show()
     }
 }
