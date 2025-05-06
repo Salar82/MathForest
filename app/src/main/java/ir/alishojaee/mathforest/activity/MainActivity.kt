@@ -15,6 +15,7 @@ import android.os.CountDownTimer
 import android.view.View
 import android.view.Window
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -33,6 +34,7 @@ import ir.alishojaee.mathforest.data.Settings
 import ir.alishojaee.mathforest.data.mainAnimals
 import ir.alishojaee.mathforest.databinding.ActivityMainBinding
 import ir.alishojaee.mathforest.databinding.DialogChangeAnimalBinding
+import ir.alishojaee.mathforest.databinding.DialogExitBinding
 import ir.alishojaee.mathforest.databinding.DialogSettingsBinding
 import ir.alishojaee.mathforest.databinding.DialogWinLoseBinding
 import ir.alishojaee.mathforest.databinding.LayoutQuizBinding
@@ -46,7 +48,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var dialogBinding: DialogSettingsBinding
     private lateinit var quizBinding: LayoutQuizBinding
-    private lateinit var animalBinding: DialogChangeAnimalBinding
     private lateinit var quizAdapter: QuizOptionsRecyclerAdapter
     private lateinit var settingsSharedPreferences: SharedPreferences
     private lateinit var settings: Settings
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         initData()
         initViews()
+        initListeners()
         initClickListeners()
     }
 
@@ -124,6 +126,25 @@ class MainActivity : AppCompatActivity() {
         if (settings.isMusic)
             mainMusic.start()
         binding.lottieMainAnimal.setAnimation(settings.mainAnimalResId)
+    }
+
+    private fun initListeners() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val animalBinding = DialogExitBinding.inflate(layoutInflater)
+                val dialog = Dialog(this@MainActivity).apply {
+                    setContentView(animalBinding.root)
+                }
+
+                animalBinding.btnExit.setOnClickListener {
+                    finish()
+                }
+                animalBinding.btnRateApp.setOnClickListener {
+                    dialog.dismiss()
+                }
+                dialog.show()
+            }
+        })
     }
 
     private fun initClickListeners() {
@@ -651,7 +672,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAnimalDialog() {
-        animalBinding = DialogChangeAnimalBinding.inflate(layoutInflater)
+        val animalBinding = DialogChangeAnimalBinding.inflate(layoutInflater)
         val dialog = Dialog(this).apply {
             setContentView(animalBinding.root)
         }
