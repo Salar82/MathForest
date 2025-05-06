@@ -9,5 +9,6 @@ data class Settings(
     var operations: MutableList<Operation>,
     var difficulty: GameDifficulty,
     var isMusic: Boolean,
-    var isSound: Boolean
+    var isSound: Boolean,
+    var mainAnimalResId: Int
 )

@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
@@ -23,11 +24,15 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.card.MaterialCardView
 import ir.alishojaee.mathforest.R
+import ir.alishojaee.mathforest.adapter.MainAnimalsRecyclerAdapter
+import ir.alishojaee.mathforest.adapter.OnClickListener
 import ir.alishojaee.mathforest.adapter.QuizOptionsRecyclerAdapter
 import ir.alishojaee.mathforest.adapter.WinnerLoserListener
 import ir.alishojaee.mathforest.data.MathQuestion
 import ir.alishojaee.mathforest.data.Settings
+import ir.alishojaee.mathforest.data.mainAnimals
 import ir.alishojaee.mathforest.databinding.ActivityMainBinding
+import ir.alishojaee.mathforest.databinding.DialogChangeAnimalBinding
 import ir.alishojaee.mathforest.databinding.DialogSettingsBinding
 import ir.alishojaee.mathforest.databinding.DialogWinLoseBinding
 import ir.alishojaee.mathforest.databinding.LayoutQuizBinding
@@ -41,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var dialogBinding: DialogSettingsBinding
     private lateinit var quizBinding: LayoutQuizBinding
+    private lateinit var animalBinding: DialogChangeAnimalBinding
     private lateinit var quizAdapter: QuizOptionsRecyclerAdapter
     private lateinit var settingsSharedPreferences: SharedPreferences
     private lateinit var settings: Settings
@@ -91,6 +97,7 @@ class MainActivity : AppCompatActivity() {
                 GameDifficulty.valueOf(getString("difficulty", "EASY")!!),
                 getBoolean("isMusic", true),
                 getBoolean("isSound", true),
+                getInt("mainAnimalResId", R.raw.lottie_main_tiger)
             )
         }
         mainMusic = MediaPlayer.create(this, R.raw.sunny).apply {
@@ -116,6 +123,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (settings.isMusic)
             mainMusic.start()
+        binding.lottieMainAnimal.setAnimation(settings.mainAnimalResId)
     }
 
     private fun initClickListeners() {
@@ -159,10 +167,15 @@ class MainActivity : AppCompatActivity() {
         binding.btnSettings.setOnClickListener {
             showSettingsDialog()
         }
+
+        binding.lottieMainAnimal.setOnClickListener {
+            showAnimalDialog()
+        }
     }
 
     private fun toggleQuizLayout(isNotShowQuiz: Boolean = true) {  // Fixme: rename variable
         if (!isNotShowQuiz) {
+            binding.lottieMainAnimal.isClickable = true
             binding.layoutQuiz.run {
                 animate()
                     .alpha(0f)
@@ -179,6 +192,8 @@ class MainActivity : AppCompatActivity() {
 
                     }).start()
             }
+        } else {
+            binding.lottieMainAnimal.isClickable = false
         }
 
 
@@ -204,9 +219,9 @@ class MainActivity : AppCompatActivity() {
         val quizLayoutAnimation =
             ObjectAnimator.ofFloat(binding.layoutQuiz, "translationY", fromQuiz, toQuiz)
         val tigerAnimation =
-            ObjectAnimator.ofFloat(binding.lottieTiger, "translationY", fromTigerY, toTigerY)
+            ObjectAnimator.ofFloat(binding.lottieMainAnimal, "translationY", fromTigerY, toTigerY)
         val tigerGoLeftAnimation =
-            ObjectAnimator.ofFloat(binding.lottieTiger, "translationX", fromTigerX, toTigerX)
+            ObjectAnimator.ofFloat(binding.lottieMainAnimal, "translationX", fromTigerX, toTigerX)
         val grassAnimation =
             ObjectAnimator.ofFloat(binding.imgGrass, "translationY", fromGrass, toGrass)
         val flowersAnimation =
@@ -269,8 +284,9 @@ class MainActivity : AppCompatActivity() {
         var qRemainedCount = settings.count  // Wrong Answers
         var wAnswerCount = 0  // Wrong Answers
 
+        @SuppressLint("SetTextI18n")
         fun nextQuestion(adapter: QuizOptionsRecyclerAdapter) {
-            if (qRemainedCount-- == 0 || wAnswerCount == 3) {
+            if (qRemainedCount == 0 || wAnswerCount == 3) {
                 finishGame(wAnswerCount)
                 wAnswerCount = 0
                 return
@@ -281,6 +297,7 @@ class MainActivity : AppCompatActivity() {
                 Quiz.generateOptions(settings.operations, question.answer, settings.difficulty)
 
             quizBinding.tvQuestion.text = question.question
+            quizBinding.tvQNumber.text = "${settings.count - qRemainedCount-- + 1}"
             adapter.answer = question.answer
             adapter.updateData(options)
         }
@@ -354,7 +371,6 @@ class MainActivity : AppCompatActivity() {
                             MediaPlayer.create(this@MainActivity, R.raw.se_wrong_answer).apply {
                                 // Next question
                                 setOnCompletionListener {
-                                    nextQuestion(quizAdapter)
                                     tvOption.setTextColor(
                                         ContextCompat.getColor(
                                             this@MainActivity,
@@ -364,6 +380,7 @@ class MainActivity : AppCompatActivity() {
                                     cardOption.setCardBackgroundColor(
                                         ContextCompat.getColor(this@MainActivity, R.color.white)
                                     )
+                                    nextQuestion(quizAdapter)
                                 }
                             }
                         loseSound.start()
@@ -383,6 +400,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
+
+        quizBinding.btnBack.setOnClickListener {
+            toggleQuizLayout(false)
+        }
 
         quizBinding.recyclerOptions.layoutManager = GridLayoutManager(
             this,
@@ -448,7 +469,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showWinLoseDialog(isWin: Boolean) {
+    private fun showWinLoseDialog(isWin: Boolean) {
         val loseMusic = MediaPlayer.create(this, R.raw.se_lose)
 
         val dialog = Dialog(this)
@@ -461,8 +482,10 @@ class MainActivity : AppCompatActivity() {
 
         if (isWin) {
             binding.textMessage.text = "آفرین! تو بردی!"
+            binding.lottieAnimationView.setAnimation(R.raw.lottie_win)
         } else {
             binding.textMessage.text = "باختی عزیزم! دوباره امتحان کن."
+            binding.lottieAnimationView.setAnimation(R.raw.lottie_lose)
         }
 
         if (settings.isMusic) {
@@ -625,5 +648,33 @@ class MainActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun showAnimalDialog() {
+        animalBinding = DialogChangeAnimalBinding.inflate(layoutInflater)
+        val dialog = Dialog(this).apply {
+            setContentView(animalBinding.root)
+        }
+
+        animalBinding.rvAnimal.layoutManager = GridLayoutManager(
+            this,
+            2,
+            GridLayoutManager.VERTICAL, false
+        )
+        animalBinding.rvAnimal.adapter = MainAnimalsRecyclerAdapter(
+            mainAnimals, object : OnClickListener {
+                override fun onItemClick(resID: Int) {
+                    binding.lottieMainAnimal.setAnimation(resID)
+                    settings.mainAnimalResId = resID
+                    settingsSharedPreferences.edit().run {
+                        putInt("mainAnimalResId", resID)
+                        commit()
+                    }
+                    dialog.dismiss()
+                }
+            }
+        )
+        dialog.show()
+
     }
 }
