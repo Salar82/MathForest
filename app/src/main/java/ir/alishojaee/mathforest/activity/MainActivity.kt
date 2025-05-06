@@ -157,146 +157,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnSettings.setOnClickListener {
-            var isSound = settings.isSound
-            var isMusic = settings.isMusic
-            dialogBinding = DialogSettingsBinding.inflate(layoutInflater)
-            val dialog = Dialog(this).apply {
-                setContentView(dialogBinding.root)
-            }
-
-            dialogBinding.btnVolume.setImageResource(
-                when (settings.isSound) {
-                    true -> R.drawable.img_volume
-                    false -> R.drawable.img_volume_off
-                }
-            )
-            dialogBinding.btnMusic.setImageResource(
-                when (settings.isMusic) {
-                    true -> R.drawable.img_music
-                    false -> R.drawable.img_music_off
-                }
-            )
-
-            dialogBinding.btnVolume.setOnClickListener {
-                dialogBinding.btnVolume.setImageResource(
-                    when (isSound) {
-                        true -> R.drawable.img_volume_off
-                        false -> R.drawable.img_volume
-                    }
-                )
-                isSound = !isSound
-            }
-            dialogBinding.btnMusic.setOnClickListener {
-                dialogBinding.btnMusic.setImageResource(
-                    when (isMusic) {
-                        true -> R.drawable.img_music_off
-                        false -> R.drawable.img_music
-                    }
-                )
-                isMusic = !isMusic
-            }
-
-            settings.operations.forEach {
-                when (it) {
-                    Operation.SUM -> dialogBinding.chOpSum.isChecked = true
-                    Operation.INTERACT -> dialogBinding.chOpInteract.isChecked = true
-                    Operation.MULTIPLY -> dialogBinding.chOpMultiply.isChecked = true
-                    Operation.DIVISION -> dialogBinding.chOpDivision.isChecked = true
-                }
-            }
-
-            when (settings.time) {
-                -1 -> dialogBinding.chTimeNone.isChecked = true
-                15 -> dialogBinding.chTime15s.isChecked = true
-                30 -> dialogBinding.chTime30s.isChecked = true
-                60 -> dialogBinding.chTime1m.isChecked = true
-                5 * 60 -> dialogBinding.chTime5m.isChecked = true
-                10 * 60 -> dialogBinding.chTime10m.isChecked = true
-            }
-
-            when (settings.count) {
-                5 -> dialogBinding.chCount5.isChecked = true
-                10 -> dialogBinding.chCount10.isChecked = true
-                20 -> dialogBinding.chCount20.isChecked = true
-                50 -> dialogBinding.chCount50.isChecked = true
-                100 -> dialogBinding.chCount100.isChecked = true
-            }
-
-            when (settings.difficulty) {
-                GameDifficulty.EASY -> dialogBinding.chDifficultyEasy.isChecked = true
-                GameDifficulty.MEDIUM -> dialogBinding.chDifficultyMedium.isChecked = true
-                GameDifficulty.HARD -> dialogBinding.chDifficultyHard.isChecked = true
-            }
-
-            // Save settings
-            dialogBinding.btnSave.setOnClickListener {
-                // Validates
-                settings.count = when (dialogBinding.chipGroupCount.checkedChipId) {
-                    R.id.ch_count_5 -> 5
-                    R.id.ch_count_10 -> 10
-                    R.id.ch_count_20 -> 20
-                    R.id.ch_count_50 -> 50
-                    R.id.ch_count_100 -> 100
-                    else -> 10
-                }
-                settings.time = when (dialogBinding.chipGroupTime.checkedChipId) {
-                    R.id.ch_time_none -> -1
-                    R.id.ch_time_15s -> 15
-                    R.id.ch_time_30s -> 30
-                    R.id.ch_time_1m -> 1 * 60
-                    R.id.ch_time_5m -> 5 * 60
-                    R.id.ch_time_10m -> 10 * 60
-                    else -> -1
-                }
-                settings.difficulty = when(dialogBinding.chipGroupDifficulty.checkedChipId) {
-                    R.id.ch_difficulty_easy -> GameDifficulty.EASY
-                    R.id.ch_difficulty_medium -> GameDifficulty.MEDIUM
-                    R.id.ch_difficulty_hard -> GameDifficulty.HARD
-                    else -> GameDifficulty.EASY
-                }
-                settings.isSound = isSound
-                settings.isMusic = isMusic
-                val operations = mutableListOf<String>()
-
-                dialogBinding.chipGroupOperation.checkedChipIds.forEach {
-                    operations.add(
-                        when (it) {
-                            R.id.ch_op_sum -> Operation.SUM.value
-                            R.id.ch_op_interact -> Operation.INTERACT.value
-                            R.id.ch_op_multiply -> Operation.MULTIPLY.value
-                            R.id.ch_op_division -> Operation.DIVISION.value
-                            else -> Operation.SUM.value
-                        }
-                    )
-                }
-
-                settings.operations = operations.mapNotNull { op ->
-                    Operation.entries.find { it.value == op.trim() }
-                } as MutableList<Operation>
-
-                if (!isMusic)
-                    mainMusic.pause()
-                else
-                    mainMusic.start()
-
-                settingsSharedPreferences.edit().run {
-                    putInt("count", settings.count)
-                    putInt("time", settings.time)
-                    putString("operations", operations.joinToString(","))
-                    putString("difficulty", settings.difficulty.name)
-                    putBoolean("isMusic", settings.isMusic)
-                    putBoolean("isSound", settings.isSound)
-                    apply()
-                }
-                dialog.dismiss()
-            }
-
-            // Cancel button
-            dialogBinding.btnCancel.setOnClickListener {
-                dialog.dismiss()
-            }
-
-            dialog.show()
+            showSettingsDialog()
         }
     }
 
@@ -414,8 +275,10 @@ class MainActivity : AppCompatActivity() {
                 wAnswerCount = 0
                 return
             }
-            val question: MathQuestion = Quiz.generateValidMathQuestion(settings.operations, settings.difficulty)
-            val options: List<Int> = Quiz.generateOptions(settings.operations, question.answer, settings.difficulty)
+            val question: MathQuestion =
+                Quiz.generateValidMathQuestion(settings.operations, settings.difficulty)
+            val options: List<Int> =
+                Quiz.generateOptions(settings.operations, question.answer, settings.difficulty)
 
             quizBinding.tvQuestion.text = question.question
             adapter.answer = question.answer
@@ -618,6 +481,149 @@ class MainActivity : AppCompatActivity() {
             }
         }
         toggleQuizLayout(false)
+        dialog.show()
+    }
+
+    private fun showSettingsDialog() {
+        var isSound = settings.isSound
+        var isMusic = settings.isMusic
+        dialogBinding = DialogSettingsBinding.inflate(layoutInflater)
+        val dialog = Dialog(this).apply {
+            setContentView(dialogBinding.root)
+        }
+
+        dialogBinding.btnVolume.setImageResource(
+            when (settings.isSound) {
+                true -> R.drawable.img_volume
+                false -> R.drawable.img_volume_off
+            }
+        )
+        dialogBinding.btnMusic.setImageResource(
+            when (settings.isMusic) {
+                true -> R.drawable.img_music
+                false -> R.drawable.img_music_off
+            }
+        )
+
+        dialogBinding.btnVolume.setOnClickListener {
+            dialogBinding.btnVolume.setImageResource(
+                when (isSound) {
+                    true -> R.drawable.img_volume_off
+                    false -> R.drawable.img_volume
+                }
+            )
+            isSound = !isSound
+        }
+        dialogBinding.btnMusic.setOnClickListener {
+            dialogBinding.btnMusic.setImageResource(
+                when (isMusic) {
+                    true -> R.drawable.img_music_off
+                    false -> R.drawable.img_music
+                }
+            )
+            isMusic = !isMusic
+        }
+
+        settings.operations.forEach {
+            when (it) {
+                Operation.SUM -> dialogBinding.chOpSum.isChecked = true
+                Operation.INTERACT -> dialogBinding.chOpInteract.isChecked = true
+                Operation.MULTIPLY -> dialogBinding.chOpMultiply.isChecked = true
+                Operation.DIVISION -> dialogBinding.chOpDivision.isChecked = true
+            }
+        }
+
+        when (settings.time) {
+            -1 -> dialogBinding.chTimeNone.isChecked = true
+            15 -> dialogBinding.chTime15s.isChecked = true
+            30 -> dialogBinding.chTime30s.isChecked = true
+            60 -> dialogBinding.chTime1m.isChecked = true
+            5 * 60 -> dialogBinding.chTime5m.isChecked = true
+            10 * 60 -> dialogBinding.chTime10m.isChecked = true
+        }
+
+        when (settings.count) {
+            5 -> dialogBinding.chCount5.isChecked = true
+            10 -> dialogBinding.chCount10.isChecked = true
+            20 -> dialogBinding.chCount20.isChecked = true
+            50 -> dialogBinding.chCount50.isChecked = true
+            100 -> dialogBinding.chCount100.isChecked = true
+        }
+
+        when (settings.difficulty) {
+            GameDifficulty.EASY -> dialogBinding.chDifficultyEasy.isChecked = true
+            GameDifficulty.MEDIUM -> dialogBinding.chDifficultyMedium.isChecked = true
+            GameDifficulty.HARD -> dialogBinding.chDifficultyHard.isChecked = true
+        }
+
+        // Save settings
+        dialogBinding.btnSave.setOnClickListener {
+            // Validates
+            settings.count = when (dialogBinding.chipGroupCount.checkedChipId) {
+                R.id.ch_count_5 -> 5
+                R.id.ch_count_10 -> 10
+                R.id.ch_count_20 -> 20
+                R.id.ch_count_50 -> 50
+                R.id.ch_count_100 -> 100
+                else -> 10
+            }
+            settings.time = when (dialogBinding.chipGroupTime.checkedChipId) {
+                R.id.ch_time_none -> -1
+                R.id.ch_time_15s -> 15
+                R.id.ch_time_30s -> 30
+                R.id.ch_time_1m -> 1 * 60
+                R.id.ch_time_5m -> 5 * 60
+                R.id.ch_time_10m -> 10 * 60
+                else -> -1
+            }
+            settings.difficulty = when (dialogBinding.chipGroupDifficulty.checkedChipId) {
+                R.id.ch_difficulty_easy -> GameDifficulty.EASY
+                R.id.ch_difficulty_medium -> GameDifficulty.MEDIUM
+                R.id.ch_difficulty_hard -> GameDifficulty.HARD
+                else -> GameDifficulty.EASY
+            }
+            settings.isSound = isSound
+            settings.isMusic = isMusic
+            val operations = mutableListOf<String>()
+
+            dialogBinding.chipGroupOperation.checkedChipIds.forEach {
+                operations.add(
+                    when (it) {
+                        R.id.ch_op_sum -> Operation.SUM.value
+                        R.id.ch_op_interact -> Operation.INTERACT.value
+                        R.id.ch_op_multiply -> Operation.MULTIPLY.value
+                        R.id.ch_op_division -> Operation.DIVISION.value
+                        else -> Operation.SUM.value
+                    }
+                )
+            }
+
+            settings.operations = operations.mapNotNull { op ->
+                Operation.entries.find { it.value == op.trim() }
+            } as MutableList<Operation>
+
+            if (!isMusic)
+                mainMusic.pause()
+            else
+                mainMusic.start()
+
+            settingsSharedPreferences.edit().run {
+                putInt("count", settings.count)
+                putInt("time", settings.time)
+                putString("operations", operations.joinToString(","))
+                putString("difficulty", settings.difficulty.name)
+                putBoolean("isMusic", settings.isMusic)
+                putBoolean("isSound", settings.isSound)
+                apply()
+            }
+            dialog.dismiss()
+        }
+
+        // Cancel button
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
         dialog.show()
     }
 }
