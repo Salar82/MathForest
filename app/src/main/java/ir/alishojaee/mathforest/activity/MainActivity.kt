@@ -714,6 +714,7 @@ class MainActivity : AppCompatActivity() {
             .setTitle("پایان سوالات")
             .setMessage("از حل سوالات منصرف شدی؟")
             .setPositiveButton("بله") { dialog, which ->
+                quizCounter?.cancel()
                 toggleQuizLayout(false)
             }
             .setNegativeButton("خیر", null)
