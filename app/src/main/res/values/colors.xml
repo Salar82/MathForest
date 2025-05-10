@@ -5,6 +5,19 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+    <color name="cloud_test">#54BDCE</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="jungle_green_primary">#66BB6A</color>
+    <color name="jungle_green_dark">#388E3C</color>
+    <color name="jungle_accent_yellow">#FFCA28</color>
+    <color name="jungle_accent_yellow_dark">#FFA000</color>
+    <color name="sky_blue_light">#81D4FA</color>
+    <color name="tiger_orange">#FFB74D</color>
+    <color name="button_red">#EF5350</color>
+    <color name="light_green">#3C9E41</color>
+    <color name="orange">#FFA726</color>
+    <color name="red">#EF5350</color>
+    <color name="progress_background">#5C78A8</color>
+
 </resources>

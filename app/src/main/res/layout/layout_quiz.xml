@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:progressBarStyleHorizontal"
+        android:layout_width="250dp"
+        android:layout_height="20dp"
+        android:layout_centerHorizontal="true"
+        android:max="1000"
+        android:progress="750"
+        android:progressBackgroundTint="@color/progress_background"
+        android:progressTint="@color/light_green" />
+
+    <TextView
+        android:id="@+id/tv_q_number"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignTop="@+id/tv_question"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="20dp"
+        android:background="@drawable/bg_q_number"
+        android:backgroundTint="@color/red"
+        android:fontFamily="@font/titr"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        tools:text="99" />
+
+    <TextView
+        android:id="@+id/tv_question"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progress_bar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:layout_toLeftOf="@id/btn_back"
+        android:layout_toRightOf="@id/tv_q_number"
+        android:fontFamily="@font/titr"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        tools:text="2 + 2 - 15 =" />
+
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignTop="@+id/tv_question"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/bg_q_number"
+        android:backgroundTint="@color/red"
+        android:gravity="center"
+        android:padding="5dp"
+        android:src="@drawable/img_x"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:tint="@color/white"
+        tools:text="99" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_options"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_question"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp" />
+</RelativeLayout>

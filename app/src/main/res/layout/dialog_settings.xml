@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="270dp"
+    android:layout_height="wrap_content"
+    android:background="#E2F8FF"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tv_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:fontFamily="@font/vazir"
+        android:paddingRight="5dp"
+        android:text="تنظیمات"
+        android:textColor="@color/button_red"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_setting"
+        android:layout_alignEnd="@+id/tv_count"
+        app:dividerColor="@color/button_red" />
+
+    <TextView
+        android:id="@+id/tv_count"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/divider_settings"
+        android:layout_alignRight="@id/tv_setting"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/vazir"
+        android:text="تعداد سوال:"
+        android:textColor="@color/black"
+        android:textStyle="bold" />
+
+    <HorizontalScrollView
+        android:id="@+id/sv_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_count"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:scrollbars="none">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:textDirection="rtl"
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_count_5"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:text="۵"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_count_10"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="۱۰"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp"
+                tools:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_count_20"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="۲۰"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_count_50"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="۵۰"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_count_100"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="۱۰۰"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sv_count"
+        android:layout_alignRight="@id/tv_setting"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/vazir"
+        android:text="مدت زمان:"
+        android:textColor="@color/black"
+        android:textStyle="bold" />
+
+    <HorizontalScrollView
+        android:id="@+id/sv_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_time"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:scrollbars="none">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:textDirection="rtl"
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_time_none"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="بدون زمان"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp"
+                tools:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_time_15s"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:text="۱۵ ثانیه"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_time_30s"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="۳۰ ثانیه"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_time_1m"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="۱ دقیقه"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_time_5m"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="۵ دقیقه"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_time_10m"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="۱۰ دقیقه"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/tv_operation"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sv_time"
+        android:layout_alignRight="@id/tv_setting"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/vazir"
+        android:text="نوع عملیات:"
+        android:textColor="@color/black"
+        android:textStyle="bold" />
+
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_difficulty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_difficulty"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        app:selectionRequired="true"
+        app:singleLine="true"
+        app:singleSelection="true">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_difficulty_hard"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:fontFamily="@font/titr"
+                android:text="سخت"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp"
+                tools:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_difficulty_medium"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:text="متوسط"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_difficulty_easy"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:fontFamily="@font/titr"
+                android:text="آسان"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+    </com.google.android.material.chip.ChipGroup>
+
+    <TextView
+        android:id="@+id/tv_difficulty"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sv_operation"
+        android:layout_alignRight="@id/tv_setting"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/vazir"
+        android:text="سطح سوالات:"
+        android:textColor="@color/black"
+        android:textStyle="bold" />
+
+    <HorizontalScrollView
+        android:id="@+id/sv_operation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_operation"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:scrollbars="none">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_operation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:textDirection="rtl"
+            app:selectionRequired="true"
+            app:singleLine="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_op_sum"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="جمع"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp"
+                tools:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_op_interact"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:text="تفریق"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_op_multiply"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="ضرب"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ch_op_division"
+                style="@style/Alish.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/titr"
+                android:text="تقسیم"
+                android:textAlignment="center"
+                app:chipCornerRadius="7dp" />
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/layout_btn_music_sound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/chip_group_difficulty"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/btn_music"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="15dp"
+            android:src="@drawable/img_music"
+            app:tint="@color/button_red" />
+
+        <ImageView
+            android:id="@+id/btn_volume"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="15dp"
+            android:src="@drawable/img_volume"
+            app:tint="@color/button_red" />
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_save"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_btn_music_sound"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/vazir"
+        android:text="ذخیره"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_cancel"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/btn_save"
+        android:layout_alignParentLeft="true"
+        android:backgroundTint="#DEDEDE"
+        android:fontFamily="@font/vazir"
+        android:text="انصراف"
+        android:textColor="@color/button_red"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+</RelativeLayout>
