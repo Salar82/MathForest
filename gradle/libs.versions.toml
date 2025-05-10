@@ -1,5 +1,6 @@
 [versions]
 agp = "8.9.2"
+firebaseBom = "33.13.0"
 kotlin = "2.1.20"
 coreKtx = "1.16.0"
 appcompat = "1.7.0"
@@ -7,16 +8,25 @@ material = "1.12.0"
 lottie = "6.6.6"
 activity = "1.10.1"
 constraintlayout = "2.2.1"
+firebaseMessagingKtx = "24.1.1"
+plugin-google-service = "4.4.2"
+tapsellPlusSdkAndroid = "2.3.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+tapsell-plus-sdk-android = { module = "ir.tapsell.plus:tapsell-plus-sdk-android", version.ref = "tapsellPlusSdkAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+google-service = { id = "com.google.gms.google-services", version.ref = "plugin-google-service" }
+
 

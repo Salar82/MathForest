@@ -1,6 +1,9 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.service)
 }
 
 android {
@@ -14,7 +17,26 @@ android {
         versionCode = 1
         versionName = "1.0.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField(
+            "String",
+            "TAPSELL_KEY",
+            gradleLocalProperties(rootDir, providers).getProperty("TAPSELL_KEY")
+        )
+        buildConfigField(
+            "String",
+            "TAPSELL_STANDARD_ZONE_ID",
+            gradleLocalProperties(rootDir, providers).getProperty("TAPSELL_STANDARD_ZONE_ID")
+        )
+        buildConfigField(
+            "String",
+            "TAPSELL_INSTERTITIAL_ZONE_ID",
+            gradleLocalProperties(rootDir, providers).getProperty("TAPSELL_INSTERTITIAL_ZONE_ID")
+        )
+        buildConfigField(
+            "String",
+            "TAPSELL_REWARDED_VIDEO_ZONE_ID",
+            gradleLocalProperties(rootDir, providers).getProperty("TAPSELL_REWARDED_VIDEO_ZONE_ID")
+        )
     }
 
     buildTypes {
@@ -38,16 +60,21 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         viewBinding = true
     }
 }
 
 dependencies {
-
+    implementation(libs.tapsell.plus.sdk.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.lottie)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
+    implementation(libs.firebase.analytics)
 }

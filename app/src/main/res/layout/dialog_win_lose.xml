@@ -35,12 +35,30 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/button_ok"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="باشه" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_continue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="@color/purple_700"
+                android:fontFamily="@font/vazir"
+                android:text="ادامه بده" />
+
+            <Button
+                android:id="@+id/button_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/vazir"
+                android:text="باشه" />
+        </LinearLayout>
 
     </LinearLayout>
 

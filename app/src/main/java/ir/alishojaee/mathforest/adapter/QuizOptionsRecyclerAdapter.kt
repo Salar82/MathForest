@@ -57,9 +57,9 @@ class QuizOptionsRecyclerAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateData(newItems: List<Int>) {
-        isClickable = true
         options = newItems
         this.notifyDataSetChanged()
+        isClickable = true
     }
 
     class OptionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

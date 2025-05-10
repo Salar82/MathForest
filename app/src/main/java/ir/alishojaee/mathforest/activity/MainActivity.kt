@@ -1,5 +1,6 @@
 package ir.alishojaee.mathforest.activity
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
@@ -7,20 +8,29 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.Window
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import com.airbnb.lottie.LottieAnimationView
@@ -41,7 +51,11 @@ import ir.alishojaee.mathforest.databinding.DialogWinLoseBinding
 import ir.alishojaee.mathforest.databinding.LayoutQuizBinding
 import ir.alishojaee.mathforest.enums.GameDifficulty
 import ir.alishojaee.mathforest.enums.Operation
+import ir.alishojaee.mathforest.utils.AdShowStatusListener
 import ir.alishojaee.mathforest.utils.Quiz
+import ir.alishojaee.mathforest.utils.TapsellAdManager
+import ir.alishojaee.mathforest.utils.getInstallerPackageName
+import ir.alishojaee.mathforest.utils.isOnline
 import ir.alishojaee.mathforest.utils.randomChoice
 import ir.alishojaee.mathforest.utils.showToast
 
@@ -56,7 +70,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainMusic: MediaPlayer
     private lateinit var playMusic: MediaPlayer
     private lateinit var winMusic: MediaPlayer
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    private var quizRemainedCount: Int = 0
     private var quizCounter: CountDownTimer? = null
+    private val adManager = TapsellAdManager(activity = this@MainActivity)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +85,11 @@ class MainActivity : AppCompatActivity() {
         initViews()
         initListeners()
         initClickListeners()
+        requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) {}
+        askNotificationPermission()
+        adManager.initAd()
     }
 
     override fun onPause() {
@@ -132,20 +154,28 @@ class MainActivity : AppCompatActivity() {
 
     private fun initListeners() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
             override fun handleOnBackPressed() {
                 if (binding.layoutQuiz.isVisible) {
                     showForceQuitQuizDialog()
                 } else {
-                    val animalBinding = DialogExitBinding.inflate(layoutInflater)
+                    val dialogExitBinding = DialogExitBinding.inflate(layoutInflater)
+                    adManager.showExitStandardBanner(dialogExitBinding.adExitBanner)
+                    dialogExitBinding.adExitBanner.isVisible = true
                     val dialog = Dialog(this@MainActivity).apply {
-                        setContentView(animalBinding.root)
+                        setContentView(dialogExitBinding.root)
                     }
 
-                    animalBinding.btnExit.setOnClickListener {
+                    dialog.setOnCancelListener {
+                        dialogExitBinding.adExitBanner.isVisible = false
+                    }
+
+                    dialogExitBinding.btnExit.setOnClickListener {
                         finish()
                     }
-                    animalBinding.btnRateApp.setOnClickListener {
+                    dialogExitBinding.btnRateApp.setOnClickListener {
                         dialog.dismiss()
+                        rateApp()
                     }
                     dialog.show()
                 }
@@ -200,6 +230,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
     private fun toggleQuizLayout(isNotShowQuiz: Boolean = true) {  // Fixme: rename variable
         if (!isNotShowQuiz) {
             binding.lottieMainAnimal.isClickable = true
@@ -222,7 +262,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.lottieMainAnimal.isClickable = false
         }
-
 
         val cloudsQuizOffset = -250f
         val sunOffset = -210f
@@ -307,14 +346,15 @@ class MainActivity : AppCompatActivity() {
         animatorSet.start()
     }
 
-    private fun startGame() {
-        var qRemainedCount = settings.count  // Wrong Answers
+    private fun startGame(isContinue: Boolean = false) {
+        quizRemainedCount = if (isContinue) quizRemainedCount else settings.count
         var wAnswerCount = 0  // Wrong Answers
+        var cAnswerCount = 0  // Correct Answers
 
         @SuppressLint("SetTextI18n")
         fun nextQuestion(adapter: QuizOptionsRecyclerAdapter) {
-            if (qRemainedCount == 0 || wAnswerCount == 3) {
-                finishGame(wAnswerCount)
+            if (quizRemainedCount == 0 || wAnswerCount == 3) {
+                finishGame(cAnswerCount, wAnswerCount)
                 wAnswerCount = 0
                 return
             }
@@ -324,7 +364,7 @@ class MainActivity : AppCompatActivity() {
                 Quiz.generateOptions(settings.operations, question.answer, settings.difficulty)
 
             quizBinding.tvQuestion.text = question.question
-            quizBinding.tvQNumber.text = "${settings.count - qRemainedCount-- + 1}"
+            quizBinding.tvQNumber.text = "${quizRemainedCount--}"
             adapter.answer = question.answer
             adapter.updateData(options)
         }
@@ -337,6 +377,7 @@ class MainActivity : AppCompatActivity() {
                     tvOption: TextView,
                     lottieParticle: LottieAnimationView
                 ) {
+                    cAnswerCount++
                     // Correct sound effect
                     if (settings.isSound) {
                         val wonSound = MediaPlayer.create(
@@ -398,6 +439,7 @@ class MainActivity : AppCompatActivity() {
                             MediaPlayer.create(this@MainActivity, R.raw.se_wrong_answer).apply {
                                 // Next question
                                 setOnCompletionListener {
+                                    release()
                                     tvOption.setTextColor(
                                         ContextCompat.getColor(
                                             this@MainActivity,
@@ -412,16 +454,21 @@ class MainActivity : AppCompatActivity() {
                             }
                         loseSound.start()
                     } else {
-                        // Next question
-                        nextQuestion(quizAdapter)
-                        tvOption.setTextColor(
-                            ContextCompat.getColor(
-                                this@MainActivity,
-                                R.color.cloud_test
-                            )
-                        )
-                        cardOption.setCardBackgroundColor(
-                            ContextCompat.getColor(this@MainActivity, R.color.white)
+                        Handler(Looper.getMainLooper()).postDelayed(
+                            {
+                                // Next question
+                                nextQuestion(quizAdapter)
+                                tvOption.setTextColor(
+                                    ContextCompat.getColor(
+                                        this@MainActivity,
+                                        R.color.cloud_test
+                                    )
+                                )
+                                cardOption.setCardBackgroundColor(
+                                    ContextCompat.getColor(this@MainActivity, R.color.white)
+                                )
+                            },
+                            1500
                         )
                     }
                 }
@@ -430,10 +477,6 @@ class MainActivity : AppCompatActivity() {
 
         quizBinding.btnBack.setOnClickListener {
             showForceQuitQuizDialog()
-        }
-
-        quizBinding.tvQNumber.setOnClickListener {
-            showToast("هنوز ${qRemainedCount} سوال دیگه مونده!")
         }
 
         quizBinding.recyclerOptions.layoutManager = GridLayoutManager(
@@ -467,7 +510,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-                finishGame(3)  // Lose
+                finishGame(0, 3)  // Lose
             }
         }
 
@@ -488,12 +531,12 @@ class MainActivity : AppCompatActivity() {
         quizBinding.progressBar.progressBackgroundTintList = ColorStateList.valueOf(backgroundColor)
     }
 
-    private fun finishGame(wAnswerCount: Int) {
+    private fun finishGame(cAnswerCount: Int, wAnswerCount: Int) {
         mainMusic.setVolume(1f, 1f)
         quizCounter?.cancel()
         quizBinding.progressBar.progress = 1000
         updateProgressBarColor(1000)
-        if (wAnswerCount < 3) {
+        if (wAnswerCount < 3 && cAnswerCount > 0) {
             showWinLoseDialog(true)
         } else {
             showWinLoseDialog(false)
@@ -502,6 +545,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showWinLoseDialog(isWin: Boolean) {
         val loseMusic = MediaPlayer.create(this, R.raw.se_lose)
+        winMusic = MediaPlayer.create(this, R.raw.music_win)
 
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -514,9 +558,14 @@ class MainActivity : AppCompatActivity() {
         if (isWin) {
             binding.textMessage.text = "آفرین! تو بردی!"
             binding.lottieAnimationView.setAnimation(R.raw.lottie_win)
+            binding.btnContinue.isVisible = false
         } else {
             binding.textMessage.text = "باختی عزیزم! دوباره امتحان کن."
             binding.lottieAnimationView.setAnimation(R.raw.lottie_lose)
+            binding.btnContinue.isVisible = when (quizRemainedCount) {
+                0 -> false
+                else -> true
+            }
         }
 
         if (settings.isMusic) {
@@ -525,16 +574,35 @@ class MainActivity : AppCompatActivity() {
                 winMusic.start()
             else
                 loseMusic.start()
-
         }
         binding.buttonOk.setOnClickListener {
             dialog.dismiss()
             if (settings.isMusic) {
-                winMusic.stop()
+                winMusic.release()
+                loseMusic.release()
                 mainMusic.start()
             }
+            toggleQuizLayout(false)
         }
-        toggleQuizLayout(false)
+        binding.btnContinue.setOnClickListener {
+            adManager.showInterstitialBanner(object : AdShowStatusListener {
+                override fun onSuccess() {
+                    if (settings.isMusic) {
+                        mainMusic.start()
+                        loseMusic.release()
+                    }
+                    dialog.dismiss()
+                    startGame(true)
+                }
+
+                override fun onFailed() {
+                    toggleQuizLayout(false)
+                    dialog.dismiss()
+                    showToast("نمایش تبلیغ موفق نبود!")
+                }
+            })
+        }
+
         dialog.show()
     }
 
@@ -695,18 +763,26 @@ class MainActivity : AppCompatActivity() {
         animalBinding.rvAnimal.adapter = MainAnimalsRecyclerAdapter(
             mainAnimals, object : OnClickListener {
                 override fun onItemClick(resID: Int) {
-                    binding.lottieMainAnimal.setAnimation(resID)
-                    settings.mainAnimalResId = resID
-                    settingsSharedPreferences.edit().run {
-                        putInt("mainAnimalResId", resID)
-                        commit()
-                    }
-                    dialog.dismiss()
+                    adManager.showRewardedVideo(object : AdShowStatusListener {
+                        override fun onSuccess() {
+                            binding.lottieMainAnimal.setAnimation(resID)
+                            settings.mainAnimalResId = resID
+                            settingsSharedPreferences.edit().run {
+                                putInt("mainAnimalResId", resID)
+                                commit()
+                            }
+                            dialog.dismiss()
+                        }
+
+                        override fun onFailed() {
+                            adManager.retryRequest()
+                            showToast("نمایش تبلیغ ناموفق بود!! از اتصال به اینترنت اطمینان حاصل فرمایید.")
+                        }
+                    })
                 }
             }
         )
         dialog.show()
-
     }
 
     private fun showForceQuitQuizDialog() {
@@ -719,5 +795,32 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton("خیر", null)
             .show()
+    }
+
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    private fun rateApp() {
+        if (!isOnline(this)) {
+            showToast("اتصال اینترنت برقرار نیست.")
+        } else {
+            val installer = getInstallerPackageName(this, packageName)
+            when (installer) {
+                "com.farsitel.bazaar" -> {
+                    val intent = Intent(Intent.ACTION_EDIT)
+                    intent.data = "bazaar://details?id=$packageName".toUri()
+                    intent.`package` = "com.farsitel.bazaar"
+                    startActivity(intent)
+                }
+
+                "ir.mservices.market" -> {
+                    val intent = Intent(Intent.ACTION_VIEW);
+                    intent.data = "myket://comment?id=$packageName".toUri();
+                    startActivity(intent);
+                }
+
+                else -> {
+                    showToast("شما برنامه را از طریق مارکت نصب نکرده‌اید!!")
+                }
+            }
+        }
     }
 }

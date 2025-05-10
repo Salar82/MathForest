@@ -3,6 +3,7 @@ package ir.alishojaee.mathforest.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
@@ -29,9 +30,9 @@ class MainAnimalsRecyclerAdapter(
         holder.lottie.run {
             setAnimation(lottieIds[position].lottieRawRes)
             playAnimation()
-            setOnClickListener {
-                onClickListener.onItemClick(lottieIds[position].lottieRawRes)
-            }
+        }
+        holder.lottieLayout.setOnClickListener {
+            onClickListener.onItemClick(lottieIds[position].lottieRawRes)
         }
         holder.tvName.text = lottieIds[position].name
     }
@@ -41,6 +42,7 @@ class MainAnimalsRecyclerAdapter(
     }
 
     class OptionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val lottieLayout: LinearLayout = itemView.findViewById(R.id.layout_lottie)
         val lottie: LottieAnimationView = itemView.findViewById(R.id.lottie_card_animal)
         val tvName: TextView = itemView.findViewById(R.id.tv_animal_name)
     }
