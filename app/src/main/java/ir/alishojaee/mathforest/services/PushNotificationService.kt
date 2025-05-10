@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -16,8 +17,8 @@ import ir.alishojaee.mathforest.utils.getInstallerPackageName
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class PushNotificationService : FirebaseMessagingService() {
-
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        Log.d("FCM", "onMessageReceived: dadjkabdakshjbd")
         val data = remoteMessage.data
         val title = data["title"]
         val body = data["body"]

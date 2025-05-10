@@ -19,6 +19,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.TextView
@@ -35,6 +36,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.card.MaterialCardView
+import com.google.firebase.messaging.FirebaseMessaging
 import ir.alishojaee.mathforest.R
 import ir.alishojaee.mathforest.adapter.MainAnimalsRecyclerAdapter
 import ir.alishojaee.mathforest.adapter.OnClickListener
@@ -90,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         ) {}
         askNotificationPermission()
         adManager.initAd()
+        handleFCMExtras()
     }
 
     override fun onPause() {
@@ -820,6 +823,21 @@ class MainActivity : AppCompatActivity() {
                 else -> {
                     showToast("شما برنامه را از طریق مارکت نصب نکرده‌اید!!")
                 }
+            }
+        }
+    }
+
+    private fun handleFCMExtras() {
+        intent?.extras?.let { extras ->
+            val extrasPackageName = extras.getString("package_name")
+            if (!extrasPackageName.isNullOrEmpty()) {
+                val installer = getInstallerPackageName(this, packageName)
+                val marketUrl = when (installer) {
+                    "com.farsitel.bazaar" -> "https://cafebazaar.ir/app/$extrasPackageName"
+                    "ir.mservices.market" -> "https://myket.ir/app/$extrasPackageName"
+                    else -> "https://cafebazaar.ir/app/$extrasPackageName"
+                }
+                startActivity(Intent(Intent.ACTION_VIEW, marketUrl.toUri()))
             }
         }
     }
