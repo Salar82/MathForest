@@ -9,7 +9,7 @@ Children can practice math skills, solve puzzles, and embark on an exciting jour
 
 ## Features
 
-- 🎨 **Colorful, kid-friendly graphics**
+- ​	🎨 **Colorful, kid-friendly graphics**
 - 🦁 **Adorable animated animal characters**
 - 🎶 **Beautiful background music**
 - ➕➖✖️ **Practice addition, subtraction, multiplication, and more**
@@ -51,7 +51,14 @@ Children can practice math skills, solve puzzles, and embark on an exciting jour
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+You are NOT allowed to use, copy, modify, redistribute, or create similar or derivative works based on this project or its assets (such as code, graphics, animations, music, etc.) for any commercial or non-commercial purpose, without explicit written permission.
+
+This project is shared for personal review and educational purposes only.
+
+Some assets or parts of this project may have been sourced from third-party resources.
+
+2025
+Salar82
 
 ---
 
